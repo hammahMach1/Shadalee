@@ -1,14 +1,16 @@
 import SwiftUI
 import AuthenticationServices
 
-// LoginView
 struct LoginView: View {
     @State private var id: String = "" // Store Staff ID as a String for the TextField
     @State private var password: String = ""
     @State private var isAuthenticated = false
     @State private var authenticationFailed = false
     @State private var showSignup = false // State to handle navigation to SignupView
-
+    
+    // State variables for animation
+    @State private var isLogoScaled = true
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 30) {
@@ -17,15 +19,21 @@ struct LoginView: View {
                     Image("kbthlogo") // Logo image, ensure the name matches the asset catalog
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 100, height: 100)
+                        // Scale the logo from full screen to its spot
+                        .frame(width: isLogoScaled ? UIScreen.main.bounds.width : 100, height: isLogoScaled ? UIScreen.main.bounds.width : 100)
                         .shadow(radius: 50)
+                        .onAppear {
+                            // Animate the logo when the view appears
+                            withAnimation(.easeInOut(duration: 1.0)) {
+                                isLogoScaled = false
+                            }
+                        }
                     
                     Text("Korle Bu Teaching Hospital")
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(.green)
                         .padding(.top, 20.0)
-                        
                 }
 
                 // Staff ID Field
@@ -125,7 +133,6 @@ struct LoginView: View {
     }
 }
 
-// SignupView
 struct SignupView: View {
     @State private var email: String = ""
     @State private var password: String = ""
@@ -203,8 +210,6 @@ struct SignupView: View {
     }
 }
 
-
-// Preview the LoginView
 struct LoginView_Previews: PreviewProvider {
     static var previews: some View {
         LoginView()
