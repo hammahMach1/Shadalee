@@ -10,7 +10,6 @@ Features
 •	Recent Activities: A section showing the latest activities performed by the user.
 Screenshots
 
-Add screenshots of your app here.
 
 Installation
 
