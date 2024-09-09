@@ -2,136 +2,126 @@ import SwiftUI
 import AuthenticationServices
 
 struct LoginView: View {
-    @State private var id: String = "" // Store Staff ID as a String for the TextField
+    @State private var id: String = ""
     @State private var password: String = ""
     @State private var isAuthenticated = false
     @State private var authenticationFailed = false
-    @State private var showSignup = false // State to handle navigation to SignupView
-    
-    // State variables for animation
+    @State private var showSignup = false
     @State private var isLogoScaled = true
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 30) {
-                // Logo and Title
-                VStack {
-                    Image("kbthlogo") // Logo image, ensure the name matches the asset catalog
-                        .resizable()
-                        .scaledToFit()
-                        // Scale the logo from full screen to its spot
-                        .frame(width: isLogoScaled ? UIScreen.main.bounds.width : 100, height: isLogoScaled ? UIScreen.main.bounds.width : 100)
-                        .shadow(radius: 50)
-                        .onAppear {
-                            // Animate the logo when the view appears
-                            withAnimation(.easeInOut(duration: 1.0)) {
-                                isLogoScaled = false
+            ZStack {
+                // Soft Background
+                LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.2), Color.gray.opacity(0.1)]), startPoint: .top, endPoint: .bottom)
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 20) {
+                    // Logo and Title
+                    VStack {
+                        Image("kbthlogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: isLogoScaled ? UIScreen.main.bounds.width : 120, height: isLogoScaled ? UIScreen.main.bounds.width : 120)
+                            .clipShape(RoundedRectangle(cornerRadius: 20))
+                            .shadow(radius: 10)
+                            .onAppear {
+                                withAnimation(.spring(response: 1.0, dampingFraction: 0.6, blendDuration: 1)) {
+                                    isLogoScaled = false
+                                }
                             }
-                        }
-                    
-                    Text("Korle Bu Teaching Hospital")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.green)
-                        .padding(.top, 20.0)
-                }
-
-                // Staff ID Field
-                VStack(alignment: .leading) {
-                    Text("Staff ID")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    
-                    TextField("Enter your Staff ID", text: $id)
-                        .keyboardType(.numberPad) // Ensure the keyboard shows numbers
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                        )
-                }
-                
-                // Password Field
-                VStack(alignment: .leading) {
-                    Text("Password")
-                        .font(.headline)
-                        .foregroundColor(.gray)
-                    
-                    SecureField("Enter your password", text: $password)
-                        .autocapitalization(.none)
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                        )
-                }
-                
-                // Login Button
-                Button(action: {
-                    authenticateUser() // Call the authentication function
-                }) {
-                    Text("Login")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.green)
-                        .cornerRadius(8)
-                        .shadow(radius: 50)
-                }
-                .padding(.top, 20)
-                
-                // Error message for failed authentication
-                if authenticationFailed {
-                    Text("Invalid username or password")
-                        .foregroundColor(.red)
-                        .font(.footnote)
-                }
-                
-                Spacer()
-                
-                // Footer with a link to Sign Up
-                HStack {
-                    Text("Don't have an account?")
-                        .font(.footnote)
-                        .foregroundColor(.gray)
-                    
-                    Button(action: {
-                        showSignup = true // Navigate to SignupView
-                    }) {
-                        Text("Sign Up")
-                            .font(.footnote)
-                            .foregroundColor(.blue)
-                            .bold()
+                        
+                        Text("Korle Bu Teaching Hospital")
+                            .font(.title3.bold())
+                            .foregroundStyle(.primary)
+                            .padding(.top, 5)
                     }
+                    
+                    // Input Fields
+                    VStack(spacing: 15) {
+                        CustomTextField(icon: "person.fill", placeholder: "Staff ID", text: $id, isSecure: false)
+                        CustomTextField(icon: "lock.fill", placeholder: "Password", text: $password, isSecure: true)
+                    }
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(20)
+                    .shadow(radius: 5)
+                    
+                    // Login Button
+                    Button(action: { authenticateUser() }) {
+                        Text("Login")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.green.gradient)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .shadow(radius: 8)
+                    }
+                    .padding(.top, 10)
+                    
+                    if authenticationFailed {
+                        Text("Invalid Staff ID or Password")
+                            .font(.footnote)
+                            .foregroundColor(.red)
+                    }
+                    
+                    // Sign-up Link
+                    HStack {
+                        Text("Don't have an account?")
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                        
+                        Button(action: { showSignup = true }) {
+                            Text("Sign Up")
+                                .font(.footnote.bold())
+                                .foregroundColor(.blue)
+                        }
+                    }
+                    .padding(.top, 5)
                 }
+                .padding(.horizontal, 30)
             }
-            .padding(.horizontal, 40)
-            // Navigation to DashboardView if authentication is successful
-            .navigationDestination(isPresented: $isAuthenticated) {
-                DashboardView()
-            }
-            // Navigation to SignupView
-            .sheet(isPresented: $showSignup) {
-                SignupView()
-            }
+            .navigationDestination(isPresented: $isAuthenticated) { DashboardView() }
+            .sheet(isPresented: $showSignup) { SignupView() }
         }
     }
     
-    // Function to authenticate the user
     func authenticateUser() {
-        // Convert id to Int and check if the entered credentials match
         if let staffID = Int(id), staffID == 2024 && password == "1234" {
-            isAuthenticated = true // Navigate to the Dashboard
+            isAuthenticated = true
         } else {
-            authenticationFailed = true // Show error message
+            authenticationFailed = true
         }
     }
 }
+
+// MARK: - Custom TextField with SF Symbol
+struct CustomTextField: View {
+    var icon: String
+    var placeholder: String
+    @Binding var text: String
+    var isSecure: Bool
+    
+    var body: some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(.gray)
+            
+            if isSecure {
+                SecureField(placeholder, text: $text)
+            } else {
+                TextField(placeholder, text: $text)
+                    .keyboardType(.numberPad)
+            }
+        }
+        .padding()
+        .background(.thinMaterial)
+        .cornerRadius(10)
+        .shadow(radius: 2)
+    }
+}
+
 
 struct SignupView: View {
     @State private var email: String = ""
